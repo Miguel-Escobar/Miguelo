@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-ncorridas = 100
-ndatos = 10**5
+ncorridas = 10**5
+ndatos = 100
 
 def esp(array):
     return np.sum(array)/len(array)
