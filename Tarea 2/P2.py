@@ -12,7 +12,13 @@ sigma = np.diag([5,6,7,2,3,10,11,10,5,6,3,7,11])
 
 sinv = np.linalg.inv(sigma)
 
-parametros = np.linalg.inv(F.transpose() @ sinv @ F) @ (F.transpose() @ sinv @ y)
+alpha = F.transpose() @ sinv @ F
+
+alphainv = np.linalg.inv(F.transpose() @ sinv @ F)
+
+b = (F.transpose() @ sinv @ y)
+
+parametros = alphainv @ b #np.linalg.inv(F.transpose() @ sinv @ F) @ (F.transpose() @ sinv @ y)
 
 A = parametros[0]
 B = parametros[1]
