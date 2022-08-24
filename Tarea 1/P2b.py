@@ -22,7 +22,9 @@ def plot(array, name, valorreal):
     ax.legend()
 
     fig.show()
-    print(var(array))
+    print("Varianza: " + str(var(array)))
+    print("Promedio: " + str(esp(array)))
+    print("Desv Estándar: " + str(np.sqrt(var(array))))
 
     return
 
