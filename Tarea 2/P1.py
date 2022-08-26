@@ -18,6 +18,7 @@ initial = (3 - s + np.sqrt((s-3)**2 + 24*s))/(12*s) # aproximación de la raíz 
 k = sp.root_scalar(optimizable, x0=initial, fprime=derivada, method='newton')
 k = k.root
 b = 20*k/np.sum(t)
+
 print(k, b)
 
 plt.figure()
