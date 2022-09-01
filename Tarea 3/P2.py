@@ -2,6 +2,15 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+# Función modelo:
+E0 = 3
+
+def modelo(E, N, alpha1, alpha2):
+    cosa = N*E*E/((E/E0)**alpha1 + (E/E0)**alpha2)
+    return cosa
+
+
 
 # Energías
 energia = np.array([0.2, 0.26, 0.32, 0.37, 0.43, 0.54, 0.68, 0.8, 1.0, 1.2, 1.4, 1.8,
@@ -14,9 +23,12 @@ flujo_e2 = np.array([3.3, 3.15, 3.04, 2.7, 2.85, 2.65, 2.9, 2.75, 2.8, 2.65, 2.2
 sigma = np.array([0.15, 0.12, 0.13, 0.14, 0.13, 0.13, 0.14, 0.13, 0.13, 0.15, 0.18,
                   0.2, 0.2, 0.22, 0.21, 0.19, 0.21, 0.18, 0.21, 0.2, 0.25, 0.3, 0.27, 0.16])
 
-
+params, cov = curve_fit(modelo, energia, flujo_e2, sigma=sigma, method='lm')
 # Gráfico en log-log
+plt.figure()
+plt.clf()
 plt.errorbar(energia, flujo_e2, color='red', marker='o', linestyle='None', yerr=sigma)
+plt.plot(np.linspace(0.2, 16, 100), modelo(np.linspace(0.2, 16, 100), params[0], params[1], params[2]))
 plt.xscale("log")
 plt.yscale("log")
 plt.xlabel("$E$ (TeV)", fontsize=12)
