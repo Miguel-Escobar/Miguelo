@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import gammainc, gamma
-x = np.array([-0.15, -0.1, -0.05, 0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1])
+xdata = np.array([-0.15, -0.1, -0.05, 0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1])
 
 F = np.array([[np.sin(-0.15*2*np.pi), np.sin(-0.1*2*np.pi), np.sin(-0.05*2*np.pi), np.sin(0*2*np.pi), np.sin(0.1*2*np.pi), np.sin(0.2*2*np.pi), np.sin(0.3*2*np.pi), np.sin(0.4*2*np.pi), np.sin(0.6*2*np.pi), np.sin(0.7*2*np.pi), np.sin(0.8*2*np.pi), np.sin(0.9*2*np.pi), np.sin(1*2*np.pi)],
               [np.cos(-0.15*2*np.pi), np.cos(-0.1*2*np.pi), np.cos(-0.05*2*np.pi), np.cos(0*2*np.pi), np.cos(0.1*2*np.pi), np.cos(0.2*2*np.pi), np.cos(0.3*2*np.pi), np.cos(0.4*2*np.pi), np.cos(0.6*2*np.pi), np.cos(0.7*2*np.pi), np.cos(0.8*2*np.pi), np.cos(0.9*2*np.pi), np.cos(1*2*np.pi)]]).transpose()
 
-y = np.array([180, 150, 80, 0, -110, -180, -182, -120, 120, 190, 198, 130, 0]).transpose()
+ydata = np.array([180, 150, 80, 0, -110, -180, -182, -120, 120, 190, 198, 130, 0]).transpose()
 
 sigmalista = np.array([5,6,7,2,3,10,11,10,5,6,3,7,11])
 
@@ -18,26 +18,33 @@ alpha = F.transpose() @ sinv @ F
 
 alphainv = np.linalg.inv(F.transpose() @ sinv @ F)
 
-b = (F.transpose() @ sinv @ y)
+b = (F.transpose() @ sinv @ ydata)
 
 parametros = alphainv @ b 
 
-A = parametros[0]
-B = parametros[1]
+# OKOKOKOK AHORA LO QUE HACEMOS ES::::::::
 
-def ajuste(t):
-    return A*np.sin(2*np.pi*t) + B*np.cos(2*np.pi*x)
+# Creación de Grid: 
+npoints = 50
+x = np.linspace(parametros[0] - 3*np.sqrt(alphainv[0,0]), parametros[0] + 3*np.sqrt(alphainv[0, 0]), npoints)
+y = np.linspace(parametros[1] - 3*np.sqrt(alphainv[1,1]), parametros[1] + 3*np.sqrt(alphainv[1, 1]), npoints)
 
-chi2 = np.sum(((y-ajuste(x))**2)/sigmalista**2)
-chindof = chi2/11
+X, Y = np.meshgrid(x, y)
+Z = np.zeros((npoints, npoints))
 
-p = gammainc(11/2, chi2/2)/gamma(11/2)
+deltax = X - parametros[0]
+deltay = Y - parametros[1]
 
-plt.figure(1)
-plt.clf()
-plt.plot(x, ajuste(x), label="Ajuste A = " + str(np.round(A, decimals=2)) + ', B = ' + str(np.round(B, decimals=2)))
-plt.errorbar(x, y, sigmalista, fmt='o', ms=4, label='Datos')
-plt.xlabel('Tiempo normalizado')
-plt.ylabel('Velocidad Radial [km/s]')
-plt.legend()
-plt.show()
+for i in range(npoints):
+    for j in range(npoints):
+        Z[i, j] = deltax[i,j] * alpha[0,0] * deltax[i,j] + deltay[i,j] * alpha[1,0] * deltax[i,j] + deltax[i,j] * alpha[0,1] * deltay[i,j] + deltay[i,j] * alpha[1,1] * deltay[i,j]
+
+chi68 = -2 * np.log(1-.68)
+chi95 = -2 * np.log(1-.95)
+
+fig = plt.figure()
+fig.clf()
+ax = fig.add_subplot(111)
+#ax.contourf(X, Y, Z, [0,chi68])
+ax.contourf(X, Y, Z, [0, chi68, chi95], cmap=None)
+fig.show()
