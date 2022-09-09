@@ -50,7 +50,7 @@ def analiza(seriea):
     plt.hist2d(seriea[:,0],seriea[:,1], 100)
     plt.show()
 
-result = METROPOLIS(100000, data, 2000, [3, 1])
+result = METROPOLIS(1000000, data, 5000, [3, 1])
 
 analiza(result)
  
