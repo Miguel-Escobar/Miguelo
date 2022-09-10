@@ -1,7 +1,8 @@
 import numpy as np
-from scipy.special import gamma, loggamma
+from scipy.special import loggamma
 import matplotlib.pyplot as plt
-
+import pandas as pd
+from tqdm import trange
 # Definir Log-likelihood.
 
 def ll(E, k, theta):
@@ -34,23 +35,23 @@ def paso_metropolis(a, datos):
         return a
 
 def METROPOLIS(ndatos, datos, temper, a0):
-    resultados = []
+    resultados = np.zeros((ndatos, 2))
     params = a0
     for i in range(temper):
         params = paso_metropolis(params, datos)
-    for i in range(ndatos):
+    for i in trange(ndatos):
+        resultados[i] = params
         params = paso_metropolis(params, datos)
-        resultados.append(params)
-    return np.array(resultados)
+    return resultados
 
-def analiza(seriea):
+def analiza(seriea, nbins):
     print("Promedios:",np.mean(seriea,axis=0))
     plt.figure()
     plt.clf()
-    plt.hist2d(seriea[:,0],seriea[:,1], 100)
+    plt.hist2d(seriea[:,0],seriea[:,1], nbins)
     plt.show()
 
-result = METROPOLIS(1000000, data, 5000, [3, 1])
+result = METROPOLIS(4000000, data, 5000, [5, 3])
 
-analiza(result)
- 
+pd.DataFrame(result).to_csv("resultados.csv", header=None, index=False)
+
