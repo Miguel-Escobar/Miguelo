@@ -15,13 +15,13 @@ def ll(E, k, theta):
 # Importar datos:
 
 data = np.genfromtxt("energias_electrones.csv")
-
+data = data[:300]
 # Defino el paso metropolis: 
 
 def paso_metropolis(a, datos):
     acandidato=np.zeros(2)
-    acandidato[0]=a[0] + np.random.normal(scale=1)
-    acandidato[1]=a[1] + np.random.normal(scale=1)
+    acandidato[0]=a[0] + np.random.normal(scale=.1)
+    acandidato[1]=a[1] + np.random.normal(scale=.1)
     if acandidato[0] <= 0:
         acandidato[0] = a[0]
     if acandidato[1]<=0:
@@ -51,7 +51,7 @@ def analiza(seriea, nbins):
     plt.hist2d(seriea[:,0],seriea[:,1], nbins)
     plt.show()
 
-result = METROPOLIS(4000000, data, 5000, [5, 3])
+result = METROPOLIS(1000000, data, 5000, [7, 1])
 
-pd.DataFrame(result).to_csv("resultados.csv", header=None, index=False)
+pd.DataFrame(result).to_csv("resultados2.csv", header=None, index=False)
 
