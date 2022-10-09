@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import trange
 
 N = 100
 L = 1
@@ -61,14 +60,15 @@ def convergio(phi, phi_anterior, rtol=0.1):
     return np.fabs(dif_relativa).max() < rtol
 
 
+# Resolución:
+
 sol = np.zeros((N,N))
-bordes(sol)
-solcopy = sol.copy()
+bordes(sol) # Seteo condiciones de borde
 counter = 0
 maxiter = 10000
 
-while True:
-    solcopy = sol.copy()
+while True: 
+    solcopy = sol.copy() # Para comparar la convergencia
     sobrerelax(sol)
     counter += 1
     if (counter > 1 and convergio(sol, solcopy)) or counter > maxiter:
