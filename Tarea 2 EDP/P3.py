@@ -8,15 +8,12 @@ def v(x, i):
     xant = (i - 1)*dx
     xi = i*dx
     xsig = (i + 1)*dx
-    if x > xant and x < xi:
-        return (x - xant)/dx
-    elif x > xi and x < xsig:
-        return (xsig - x)/dx
-    else:
-        return 0
+    returnable = np.zeros(len(x))
+    returnable[np.logical_and(x > xant,x < xi)] = (x[np.logical_and(x > xant, x < xi)] - xant)/dx
+    returnable[np.logical_and(x >= xi, x < xsig)] = (xsig - x[np.logical_and(x >= xi, x < xsig)])/dx
+    return returnable
 
-xx, dx = np.linspace(0, 2, N, retstep=True)
-x = np.linspace(0, 2, 100)
+x = np.linspace(0, L, 100)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
