@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import simps
 
-N = 100
-L = 1
+N = int(input("Grilla de N x N, N="))
+L = 10
 r = L/4
-V0 = 1
+V0 = 10
 D = 100
 dx = L/N
 w = 2/(1 + np.pi/N)
+miniter = 10
+maxiter = 1000 - miniter
 
 # Array con distancias desde el centro:
 
@@ -59,13 +62,22 @@ def convergio(phi, phi_anterior, rtol=0.1):
     dif_relativa = ((phi_anterior[not_zero] - phi[not_zero]) / phi_anterior[not_zero])
     return np.fabs(dif_relativa).max() < rtol
 
+# Para calcular la capacitancia:
+
+def capacitancia(phi, V0, D):
+    E = -np.gradient(phi, dx)[0]
+    Q = simps(E[0], dx=dx)*D/np.pi
+    Cap = Q/(2*V0)
+    return Cap
 
 # Resolución:
 
 sol = np.zeros((N,N))
 bordes(sol) # Seteo condiciones de borde
 counter = 0
-maxiter = 10000
+
+for i in range(miniter): # Mínimo de iteraciones
+    sobrerelax(sol)
 
 while True: 
     solcopy = sol.copy() # Para comparar la convergencia
@@ -80,4 +92,4 @@ ax.pcolormesh(sol)
 ax.set_xlabel("SOR")
 fig.show()
 
-
+print("Capacitancia = " + str(capacitancia(sol, V0, D)))
