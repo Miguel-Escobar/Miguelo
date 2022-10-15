@@ -43,6 +43,7 @@ for i in range(N):
     un += a[i]*v(xx, i+1)
 
 # Ahora FFT:
+
 rho = np.sin(2*np.pi*xx)
 rhofft = np.fft.fft(rho)
 freq = np.fft.fftfreq(puntos, d=1)
@@ -62,7 +63,6 @@ fig.clf()
 ax = fig.add_subplot(111)
 ax.plot(xx, un, label="FEM")
 ax.plot(xx,ufft, label="FFT", ls="--")
-# ax.plot(x, a, label="Vector A")
 ax.legend()
 ax.set_xlabel(r"$x$")
 ax.set_ylabel(r"u(x)")

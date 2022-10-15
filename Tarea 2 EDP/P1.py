@@ -1,11 +1,12 @@
+from re import X
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 
 N = int(input("Grilla de N x N, N="))
-L = 10
+L = 1
 r = L/4
-V0 = 10
+V0 = 1
 D = 100
 dx = L/N
 w = 2/(1 + np.pi/N)
@@ -85,10 +86,11 @@ while True:
     counter += 1
     if (counter > 1 and convergio(sol, solcopy)) or counter > maxiter:
         break
-
+x = np.linspace(0,L,N+1)
+x,y = np.meshgrid(x, x)
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.pcolormesh(sol)
+ax.pcolormesh(x, y, sol)
 ax.set_xlabel("SOR")
 fig.show()
 
