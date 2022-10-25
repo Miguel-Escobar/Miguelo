@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
-import math
-
+from tqdm import trange
 # Parámetros y variables globales
 # Unidades
 sigma=1
@@ -10,10 +9,11 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-N=20 # Número de partículas
+N=4
+sqrtN = 2 # Número de partículas
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=0.1 # Temperatura
-Ttotal = .1 # Tiempo total de simulación
+Ttotal = 2# Tiempo total de simulación
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
@@ -33,9 +33,9 @@ vy=np.zeros(N)
 # Retorna fx,fy
 def fuerzapar(dx,dy):
     r = dx**2 + dy**2
-    print(1/r**7)
-    fx = 48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dx
-    fy = 48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dy
+
+    fx = -48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dx
+    fy = -48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dy
 
     return fx,fy
 
@@ -52,7 +52,7 @@ def dij(i,j):
     if (dy>0.5*L):
         dy=dy-L
     if (dy<-0.5*L):
-        dy=dy+L        
+        dy=dy+L  
     return dx,dy
 
 # Termostato de reescalamiento de velocidades
@@ -74,8 +74,8 @@ def condicioninicial():
     global x, y, vx, vy
     vx = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
     vy = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
-    x = np.linspace(0, L, N)
-    y = np.linspace(0, L, N)
+    x = np.meshgrid(np.linspace(0.1, L-.1, sqrtN), np.linspace(0.1, L-0.1, sqrtN))[0].flatten()
+    y = np.meshgrid(np.linspace(0.1, L-.1, sqrtN), np.linspace(0.1, L-0.1, sqrtN))[1].flatten()
     return
 # Simulación completa
 
@@ -84,12 +84,13 @@ ax=np.zeros(N)
 ay=np.zeros(N)
 
 #Inicializa
+
 condicioninicial()
 
-plt.scatter(x, y)
 #Loop de simulación
 paso=0
-for t in np.arange(0,Ttotal,dt):
+wawawa = int(Ttotal/dt)
+for t in trange(wawawa):
     # Calcula las aceleraciones. Método O(N^2)
     for i in range(N):
         ax[i]=0
@@ -132,3 +133,6 @@ for t in np.arange(0,Ttotal,dt):
         
     # Se incrementa en uno el paso
     paso=paso+1
+
+plt.scatter(x, y)
+plt.show()
