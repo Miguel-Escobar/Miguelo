@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 import math
 
 # Parámetros y variables globales
@@ -12,7 +13,7 @@ epsilon=1
 N=20 # Número de partículas
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=0.1 # Temperatura
-Ttotal = 10 # Tiempo total de simulación
+Ttotal = .1 # Tiempo total de simulación
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
@@ -21,6 +22,7 @@ radioc2=radioc*radioc # Radio de corte al cuadrado
 # Pongo x e y por separado, se podría también tener arreglos de dos columnas
 x=np.zeros(N)
 y=np.zeros(N)
+
 vx=np.zeros(N)
 vy=np.zeros(N)
 
@@ -30,8 +32,11 @@ vy=np.zeros(N)
 # Recibe dx,dy (ya corregidos por CBP)
 # Retorna fx,fy
 def fuerzapar(dx,dy):
-    fx=XXXX
-    fy=XXXX
+    r = dx**2 + dy**2
+    print(1/r**7)
+    fx = 48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dx
+    fy = 48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dy
+
     return fx,fy
 
 # Calcula la distancia entre dos partículas y corrije por CBP
@@ -54,20 +59,34 @@ def dij(i,j):
 # No recibe ningún parámetro ni retorna datos
 # Modifica los arreglos vx,vy
 def termostato():
-    
+    global vx, vy
+    Tcinetica = np.mean((masa/2)*(vx**2 + vy**2))
+    ajuste = np.sqrt(Temperatura/Tcinetica)
+    vx = vx*ajuste
+    vy = vy*ajuste
+    return
+
 # Inicializa las coordenadas y velocidades
 # No recibe ningún parámetro ni retorna datos
 # Modifica los arreglos x,y,vx,vy
-def condicioninicial():
-    
 
+def condicioninicial():
+    global x, y, vx, vy
+    vx = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
+    vy = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
+    x = np.linspace(0, L, N)
+    y = np.linspace(0, L, N)
+    return
 # Simulación completa
 
 #Arreglo de aceleraciones
 ax=np.zeros(N)
 ay=np.zeros(N)
+
 #Inicializa
 condicioninicial()
+
+plt.scatter(x, y)
 #Loop de simulación
 paso=0
 for t in np.arange(0,Ttotal,dt):
