@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 from tqdm import trange
+from matplotlib.animation import FuncAnimation
 # Parámetros y variables globales
 # Unidades
 sigma=1
@@ -9,10 +10,10 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-N=4
-sqrtN = 2 # Número de partículas
+N=169 # Número de partículas
+sqrtN = 13
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
-Temperatura=0.1 # Temperatura
+Temperatura=1 # Temperatura
 Ttotal = 2# Tiempo total de simulación
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
@@ -32,8 +33,8 @@ vy=np.zeros(N)
 # Recibe dx,dy (ya corregidos por CBP)
 # Retorna fx,fy
 def fuerzapar(dx,dy):
-    r = dx**2 + dy**2
 
+    r = dx**2 + dy**2
     fx = -48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dx
     fy = -48*epsilon*((sigma**6)/(r**4) - (2*sigma**12)/(r**7))*dy
 
@@ -74,12 +75,22 @@ def condicioninicial():
     global x, y, vx, vy
     vx = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
     vy = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
-    x = np.meshgrid(np.linspace(0.1, L-.1, sqrtN), np.linspace(0.1, L-0.1, sqrtN))[0].flatten()
-    y = np.meshgrid(np.linspace(0.1, L-.1, sqrtN), np.linspace(0.1, L-0.1, sqrtN))[1].flatten()
+    lin, espaciado = np.linspace(0, L, sqrtN, endpoint=False, retstep=True)
+    x = np.meshgrid(lin,lin)[0].flatten() + espaciado/2
+    y = np.meshgrid(lin,lin)[1].flatten() + espaciado/2
     return
-# Simulación completa
 
-#Arreglo de aceleraciones
+# Función para poder animar
+
+def animable(i):
+    global listaanimable
+    #xdata, ydata = listaanimable[i]
+    scatter.set_offsets(listaanimable[i])
+    return scatter,
+
+
+#Arreglo de aceleraciones}
+
 ax=np.zeros(N)
 ay=np.zeros(N)
 
@@ -89,8 +100,9 @@ condicioninicial()
 
 #Loop de simulación
 paso=0
-wawawa = int(Ttotal/dt)
-for t in trange(wawawa):
+Npasos = int(Ttotal/dt)
+listaanimable = [[x.copy(), y.copy()]]
+for t in trange(Npasos):
     # Calcula las aceleraciones. Método O(N^2)
     for i in range(N):
         ax[i]=0
@@ -130,9 +142,14 @@ for t in trange(wawawa):
     # Cada 1000 pasos, reescala la velocidades
     if(paso%1000==0):
         termostato()
-        
+        print(" se ajusto la T ")
     # Se incrementa en uno el paso
     paso=paso+1
+    listaanimable.append([x.copy(), y.copy()])
 
-plt.scatter(x, y)
+fig = plt.figure(figsize=(7,7))
+ax = plt.axes(xlim=(0,L),ylim=(0,L))
+scatter=ax.scatter(listaanimable[-1][0], listaanimable[-1][1])
+
+#anim = FuncAnimation(fig, animable, interval=10)
 plt.show()
