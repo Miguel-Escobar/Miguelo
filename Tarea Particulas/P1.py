@@ -10,11 +10,11 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-N=169 # Número de partículas
-sqrtN = 13
+N=100 # Número de partículas
+sqrtN = 10
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=1 # Temperatura
-Ttotal = 2# Tiempo total de simulación
+Ttotal = 5# Tiempo total de simulación
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
@@ -83,10 +83,15 @@ def condicioninicial():
 # Función para poder animar
 
 def animable(i):
-    global listaanimable
-    #xdata, ydata = listaanimable[i]
-    scatter.set_offsets(listaanimable[i])
-    return scatter,
+    global listaanimable, scatter
+    Tcinetica = np.mean((masa/2)*(listavelocidades[i][0]**2 + listavelocidades[i][1]**2))
+    ajuste = np.sqrt(Temperatura/Tcinetica)
+    tiempo = dt*i
+    data = np.transpose(listaanimable[i])
+    scatter.set_offsets(data)
+    delta_text.set_text("delta = %.1f" % ajuste)
+    tiempo_text.set_text("t = %.2f" % tiempo)
+    return scatter, delta_text, tiempo_text
 
 
 #Arreglo de aceleraciones}
@@ -97,11 +102,13 @@ ay=np.zeros(N)
 #Inicializa
 
 condicioninicial()
+termostato()
 
 #Loop de simulación
 paso=0
-Npasos = int(Ttotal/dt)
-listaanimable = [[x.copy(), y.copy()]]
+Npasos = int((Ttotal)/dt)
+listaanimable = [np.array([x.copy(), y.copy()])]
+listavelocidades = [np.array([vx.copy(), vy.copy()])]
 for t in trange(Npasos):
     # Calcula las aceleraciones. Método O(N^2)
     for i in range(N):
@@ -140,16 +147,18 @@ for t in trange(Npasos):
     #####
     
     # Cada 1000 pasos, reescala la velocidades
-    if(paso%1000==0):
+    if paso%100==0:
         termostato()
-        print(" se ajusto la T ")
     # Se incrementa en uno el paso
     paso=paso+1
-    listaanimable.append([x.copy(), y.copy()])
+
+    listaanimable.append(np.array([x.copy(), y.copy()]))
+    listavelocidades.append(np.array([vx.copy(), vy.copy()]))
 
 fig = plt.figure(figsize=(7,7))
 ax = plt.axes(xlim=(0,L),ylim=(0,L))
-scatter=ax.scatter(listaanimable[-1][0], listaanimable[-1][1])
-
-#anim = FuncAnimation(fig, animable, interval=10)
+scatter = ax.scatter(listaanimable[0][0], listaanimable[0][1])
+delta_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+tiempo_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
+anim = FuncAnimation(fig, animable, frames=Npasos, interval=10)
 plt.show()
