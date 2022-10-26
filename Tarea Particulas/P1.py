@@ -14,10 +14,12 @@ N=100 # Número de partículas
 sqrtN = 10
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=1 # Temperatura
-Ttotal = 5# Tiempo total de simulación
+Ttotal = 1 # Tiempo total de simulación
+Transiente = 5
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
+
 
 # Variables globales
 # Pongo x e y por separado, se podría también tener arreglos de dos columnas
@@ -106,10 +108,11 @@ termostato()
 
 #Loop de simulación
 paso=0
-Npasos = int((Ttotal)/dt)
-listaanimable = [np.array([x.copy(), y.copy()])]
-listavelocidades = [np.array([vx.copy(), vy.copy()])]
-for t in trange(Npasos):
+Npasos = int(Ttotal/dt)
+Ntransiente = int(Transiente/dt)
+listaanimable = []#[np.array([x.copy(), y.copy()])]
+listavelocidades = [] #[np.array([vx.copy(), vy.copy()])]
+for t in trange(Npasos + Ntransiente):
     # Calcula las aceleraciones. Método O(N^2)
     for i in range(N):
         ax[i]=0
@@ -152,13 +155,25 @@ for t in trange(Npasos):
     # Se incrementa en uno el paso
     paso=paso+1
 
-    listaanimable.append(np.array([x.copy(), y.copy()]))
-    listavelocidades.append(np.array([vx.copy(), vy.copy()]))
+    if paso >= Ntransiente:
+        listaanimable.append(np.array([x.copy(), y.copy()]))
+        listavelocidades.append(np.array([vx.copy(), vy.copy()]))
 
 fig = plt.figure(figsize=(7,7))
 ax = plt.axes(xlim=(0,L),ylim=(0,L))
-scatter = ax.scatter(listaanimable[0][0], listaanimable[0][1])
-delta_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
-tiempo_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
-anim = FuncAnimation(fig, animable, frames=Npasos, interval=10)
-plt.show()
+
+if input("¿Animar? (si/no): ").lower() == "si":
+    scatter = ax.scatter(listaanimable[0][0], listaanimable[0][1])
+    delta_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+    tiempo_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
+    anim = FuncAnimation(fig, animable, frames=Npasos, interval=10)
+    plt.show()
+
+else:
+    wii = -1
+    tiempoo = Npasos*dt
+    ax.scatter(listaanimable[wii][0], listaanimable[wii][1], s = 1200)
+    ax.text(0.02, 0.95, "Tiempo = %.2f" % tiempoo, transform=ax.transAxes)
+    ax.set_xlabel(r"x [$\sigma$]")
+    ax.set_ylabel(r"y [$\sigma$]")
+    fig.show()
