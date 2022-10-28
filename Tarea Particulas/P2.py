@@ -12,12 +12,12 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-N=625 # Número de partículas
-sqrtN = 25
+N=36# Número de partículas
+sqrtN =6
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=1 # Temperatura
-Ttotal = 10 # Tiempo total de simulación
-Transiente = 5
+Ttotal = 50 # Tiempo total de simulación
+Transiente = 10
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
@@ -165,7 +165,15 @@ listaanimable = np.array(listaanimable)
 listavelocidades = np.array(listavelocidades)
 
 # Calculo del desplazamiento cuadratico medio:
+velocidadesenx = listavelocidades[:, 0]
+velocidadeseny = listavelocidades[:, 1]
+desplazamientosenx = velocidadesenx*dt
+desplazamientoseny = velocidadeseny*dt
+desplazamientosacumuladosenx = np.cumsum(desplazamientosenx, axis=0)
+desplazamientosacumuladoseny = np.cumsum(desplazamientoseny, axis=0)
 
+desplazamientos = desplazamientosacumuladosenx**2 + desplazamientosacumuladoseny**2
+promedio = np.mean(desplazamientos, axis=1)
 desplazamientosxy = np.cumsum(listavelocidades*dt, axis=0)
 rcuadraticomedio = np.mean(desplazamientosxy[:, 0, :]**2 + desplazamientosxy[:, 1, :]**2, axis=1)
 tiempos = dt*np.arange(Npasos)
@@ -181,6 +189,7 @@ b, _ = curve_fit(fittable, tiempos, rcuadraticomedio, p0=adivinanza)
 fig2 = plt.figure(2)
 ax2 = fig2.add_subplot(111)
 ax2.plot(tiempos, rcuadraticomedio, label=r"$\langle r(t)^{2} \rangle$")
+# ax2.plot(tiempos, promedio, label=r"$\langle r(t)^{2} \rangle$ 2")
 ax2.plot(tiempos, fittable(tiempos, b), ls="--", label="Ajuste lineal")
 ax2.legend()
 fig2.show()
@@ -195,7 +204,7 @@ fig2.show()
 fig = plt.figure(figsize=(7,7))
 ax = plt.axes(xlim=(0,L),ylim=(0,L))
 
-if input("¿Animar? (si/no): ").lower() == "si":
+if True: #input("¿Animar? (si/no): ").lower() == "si":
     scatter = ax.scatter(listaanimable[0][0], listaanimable[0][1])
     delta_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
     tiempo_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
