@@ -1,0 +1,48 @@
+1: Temperatura: 0.1
+Coeficiente D: 1.622675119509858e-05
+Coeficiente ajuste lineal: 0.00010349792647765997
+
+2: Temperatura: 0.1
+Coeficiente D: 0.0019038689202817295
+Coeficiente ajuste lineal: 0.004596569913067766
+
+3: Temperatura: 0.1
+Coeficiente D: 1.086578238614398e-05
+Coeficiente ajuste lineal: 8.064033913699216e-05
+
+1: Temperatura: 0.5
+Coeficiente D: 0.0005486093899001387
+Coeficiente ajuste lineal: 0.00201761266473602
+
+2: Temperatura: 0.5
+Coeficiente D: 0.00043602113583176514
+Coeficiente ajuste lineal: 0.0011921136960387035
+
+3: Temperatura: 0.5
+Coeficiente D: 0.0008867940939022173
+Coeficiente ajuste lineal: 0.00290196356059186
+
+1: Temperatura: 1
+Coeficiente D: 0.002474892632365285
+Coeficiente ajuste lineal: 0.005051131628883549
+
+2: Temperatura: 1
+Coeficiente D: 0.0014321142393194145
+Coeficiente ajuste lineal: 0.005665287875824482
+
+3. Temperatura: 1
+Coeficiente D: 0.0007341196596340576
+Coeficiente ajuste lineal: 0.0033169656674559398
+
+1: Temperatura: 2
+Coeficiente D: 0.003499715373845753
+Coeficiente ajuste lineal: 0.016816569726782797
+
+2: Temperatura: 2
+Coeficiente D: 0.0015031630698350061
+Coeficiente ajuste lineal: 0.0073869739597603665
+
+3: Temperatura: 2
+Coeficiente D: 0.0013179581869484176
+Coeficiente ajuste lineal: 0.006029561562472403
+

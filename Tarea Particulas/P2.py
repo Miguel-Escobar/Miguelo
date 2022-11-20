@@ -12,24 +12,16 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-N=36# Número de partículas
-sqrtN =6
+sqrtN=2
+N = sqrtN*sqrtN
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=1 # Temperatura
-Ttotal = 50 # Tiempo total de simulación
-Transiente = 10
+Ttotal = 1 # Tiempo total de simulación
+Transiente = 1
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
 
-
-# Variables globales
-# Pongo x e y por separado, se podría también tener arreglos de dos columnas
-x=np.zeros(N)
-y=np.zeros(N)
-
-vx=np.zeros(N)
-vy=np.zeros(N)
 
 # Funciones útiles
 
@@ -79,24 +71,27 @@ def condicioninicial():
     global x, y, vx, vy
     vx = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
     vy = np.sqrt(2*Temperatura/masa)*norm.rvs(size=N)
+    vx = vx - np.mean(vx)
+    vy = vy - np.mean(vy)
     lin, espaciado = np.linspace(0, L, sqrtN, endpoint=False, retstep=True)
     x = np.meshgrid(lin,lin)[0].flatten() + espaciado/2
     y = np.meshgrid(lin,lin)[1].flatten() + espaciado/2
     return
 
-# Función para poder animar
+# Curve fit:
 
-def animable(i):
-    global listaanimable, scatter
-    Tcinetica = np.mean((masa/2)*(listavelocidades[i][0]**2 + listavelocidades[i][1]**2))
-    ajuste = np.sqrt(Temperatura/Tcinetica)
-    tiempo = dt*i
-    data = np.transpose(listaanimable[i])
-    scatter.set_offsets(data)
-    delta_text.set_text("delta = %.1f" % ajuste)
-    tiempo_text.set_text("t = %.2f" % tiempo)
-    return scatter, delta_text, tiempo_text
+def fittable(x, b):
+    return b*x
 
+
+
+# Variables globales
+# Pongo x e y por separado, se podría también tener arreglos de dos columnas
+x=np.zeros(N)
+y=np.zeros(N)
+
+vx=np.zeros(N)
+vy=np.zeros(N)
 
 #Arreglo de aceleraciones}
 
@@ -165,57 +160,50 @@ listaanimable = np.array(listaanimable)
 listavelocidades = np.array(listavelocidades)
 
 # Calculo del desplazamiento cuadratico medio:
-velocidadesenx = listavelocidades[:, 0]
-velocidadeseny = listavelocidades[:, 1]
-desplazamientosenx = velocidadesenx*dt
-desplazamientoseny = velocidadeseny*dt
-desplazamientosacumuladosenx = np.cumsum(desplazamientosenx, axis=0)
-desplazamientosacumuladoseny = np.cumsum(desplazamientoseny, axis=0)
 
-desplazamientos = desplazamientosacumuladosenx**2 + desplazamientosacumuladoseny**2
-promedio = np.mean(desplazamientos, axis=1)
 desplazamientosxy = np.cumsum(listavelocidades*dt, axis=0)
 rcuadraticomedio = np.mean(desplazamientosxy[:, 0, :]**2 + desplazamientosxy[:, 1, :]**2, axis=1)
 tiempos = dt*np.arange(Npasos)
+coeficienteD = rcuadraticomedio[1:]/(4*tiempos[1:])
 
-# Curve fit:
 
-def fittable(x, b):
-    return b*x
 adivinanza =  (rcuadraticomedio[-1]-rcuadraticomedio[0])/(tiempos[-1]-tiempos[0])
 b, _ = curve_fit(fittable, tiempos, rcuadraticomedio, p0=adivinanza)
 
 
-fig2 = plt.figure(2)
-ax2 = fig2.add_subplot(111)
-ax2.plot(tiempos, rcuadraticomedio, label=r"$\langle r(t)^{2} \rangle$")
-# ax2.plot(tiempos, promedio, label=r"$\langle r(t)^{2} \rangle$ 2")
-ax2.plot(tiempos, fittable(tiempos, b), ls="--", label="Ajuste lineal")
-ax2.legend()
-fig2.show()
+# fig2 = plt.figure(2)
+# fig2.clf()
+# ax2 = fig2.add_subplot(211)
+# ax3 = fig2.add_subplot(212)
+# ax2.plot(tiempos, rcuadraticomedio, label=r"$\langle r(t)^{2} \rangle$")
+# ax2.plot(tiempos, fittable(tiempos, b), ls="--", label="Ajuste lineal")
+# ax3.plot(tiempos[1:], coeficienteD)
+# ax3.set_xlabel("tiempo")
+# ax2.set_xlabel("tiempo")
+# ax3.set_ylabel("D(t)")
+# ax2.set_ylabel(r"$\langle r(t)^{2} \rangle$")
+# ax2.legend()
+# fig2.tight_layout()
+# fig2.show()
+# print("Temperatura: " + str(Temperatura))
+# print("Coeficiente D: " +  str(coeficienteD[-1]))
+# print("Coeficiente ajuste lineal: " + str(b[0]))
 
+listaD = [1.622675119509858e-05, 0.0019038689202817295, 1.086578238614398e-05, 0.0005486093899001387, 0.00043602113583176514, 0.0008867940939022173, 0.002474892632365285, 0.0014321142393194145, 0.0007341196596340576, 0.003499715373845753, 0.0015031630698350061, 0.0013179581869484176]
+temperaturas = [.1, .1, .1, .5, .5, .5, 1, 1, 1, 2, 2, 2]
+fig = plt.figure(1)
+fig.clf()
+ax = fig.add_subplot(111)
+ax.plot(temperaturas, listaD, 'o', label="Datos")
+ax.plot([0.1, 0.5, 1, 2], [6.436e-4, 6.238e-4, 1.547e-3, 2.106e-3], "-o", label="Promedios")
+ax.legend()
+ax.set_xlabel("Temperatura")
+ax.set_ylabel("Coeficiente de difusión")
+fig.tight_layout()
+fig.show()
 
-
-
-
-
-
-
-fig = plt.figure(figsize=(7,7))
-ax = plt.axes(xlim=(0,L),ylim=(0,L))
-
-if True: #input("¿Animar? (si/no): ").lower() == "si":
-    scatter = ax.scatter(listaanimable[0][0], listaanimable[0][1])
-    delta_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
-    tiempo_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
-    anim = FuncAnimation(fig, animable, frames=Npasos, interval=10)
-    plt.show()
-
-else:
-    wii = -1
-    tiempoo = Npasos*dt
-    ax.scatter(listaanimable[wii][0], listaanimable[wii][1])
-    ax.text(0.02, 0.95, "Tiempo = %.2f" % tiempoo, transform=ax.transAxes)
-    ax.set_xlabel(r"x [$\sigma$]")
-    ax.set_ylabel(r"y [$\sigma$]")
-    fig.show()
+# while True:
+#     if input("¿Guardaste el gráfico? ").lower() == "si":
+#         break
+#     else: 
+#         print("Acuerdate de guardar el gráfico!")
