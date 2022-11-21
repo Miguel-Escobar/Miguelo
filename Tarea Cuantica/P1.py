@@ -3,17 +3,25 @@ import matplotlib.pyplot as plt
 from tqdm import trange
 from scipy.optimize import bisect
 from scipy.integrate import simpson
-# Función de integración por Leapfrog:
 
-def leapfrog(rhs, initialvalue, initialtime, finaltime, Ndatapoints, params, forward=True):
+
+def leapfrog(rhs, initialvalue, initialtime, finaltime, Ndatapoints, params, forward=True, returnTimes=False):
+    '''
+    Sea X: R -> R^n. Esta función resulve sistemas del estilo dX/dt = F(t, X) usando
+    el método de Leapfrog (no staggered). Se puede integrar de adentro hacia afuera o
+    de afuera hacia adentro con el parámetro forward.
+    '''
     dt = (finaltime - initialtime)/(Ndatapoints-1)
     X = np.zeros((Ndatapoints, 2))
+
     if forward:
         X[0] = initialvalue
         t=initialtime
+        times = [t]
         for i in range(Ndatapoints-1):
             X[i+1] = X[i] + rhs(X[i], t, params)*dt
             t += dt
+            times.append(t)
     else:
         X[-1] = initialvalue
         t=finaltime
@@ -45,14 +53,14 @@ def atomohidrogeno(vec, t, E):
 # Condiciones iniciales convenientes:
 
 def condicionesiniciales(E0, x0=0.01):
-    k2_0 = (l*(l+1)/(tfinal**2) - 2/tfinal - E0)
-    v0 = -np.sqrt(k2_0)*x0 - k2_0*x0*dt/2
-    return np.array([x0, v0])
-
+    # k2_0 = (l*(l+1)/(tfinal**2) - 2/tfinal - E0)   # PODRIA USAR ESTO PERO ES COMO MAGIA NEGRA
+    # v0 = -np.sqrt(k2_0)*x0 - k2_0*x0*dt/2
+    # return np.array([x0, v0])
+    return np.array([1, 0.01])
 # Determinamos cuando cambia de signo:
 
 def axisintersect(E, array=True):
-    if array:
+    if array:  # Necesario pues la funcion len(E) pierde sentido si E es un float.
         intersect = np.zeros(len(E))
         for j in trange(len(E)):
             E0 = E[j]
@@ -65,7 +73,7 @@ def axisintersect(E, array=True):
 
 # Aplicación de las funciones:
 
-energias = np.linspace(-1.01, -2/tfinal, 100)
+energias = np.linspace(-1.01, -2/tfinal, 100) # Se llega hasta -2/tfinal pues más allá la función de condiciones iniciales se indefine.
 phiphi = axisintersect(energias)
 fig1 = plt.figure(1)
 fig1.clf()
@@ -75,7 +83,7 @@ roots = []
 
 for i in range(len(energias)-1):
     i+=1
-    if phiphi[i]*phiphi[i-1] < 0:
+    if phiphi[i]*phiphi[i-1] < 0: # Encontramos una autoenergía.
         root = bisect(axisintersect, energias[i-1], energias[i], args=False, xtol=1e-4)
         roots.append(root)
         x = np.linspace(0, tfinal, Npasos)
