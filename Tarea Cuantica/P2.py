@@ -68,9 +68,10 @@ def normalize(x, fx):
 #### AHORA EL CODIGO ES ESPECIFICO PARA ESTE PROBLEMA #####
 
 tfinal = 30
+tinicial = 0.001
 Npasos = 1000
 tol = 1e-10
-dt = tfinal/(Npasos-1)
+dt = (tfinal-tinicial)/(Npasos-1)
 l = 0
 
 # RHS para este problema:
@@ -86,25 +87,24 @@ def condicionesiniciales(E0, x0=0.01):
     # k2_0 = (l*(l+1)/(tfinal**2) - 2/tfinal - E0)   # PODRIA USAR ESTO PERO ES COMO MAGIA NEGRA
     # v0 = -np.sqrt(k2_0)*x0 - k2_0*x0*dt/2
     # return np.array([x0, v0])
-    return np.array([1, 0.01])
+    return np.array([0, 0.01])
 # Determinamos cuando cambia de signo:
 
-def axisintersect(E, array=True):
+def finalvalue(E, array=True):
     if array:  # Necesario pues la funcion len(E) pierde sentido si E es un float.
-        intersect = np.zeros(len(E))
+        final = np.zeros(len(E))
         for j in trange(len(E)):
-            E0 = E[j]
-            initialvalues = condicionesiniciales(E0)
-            intersect[j] = leapfrog(atomohidrogeno, initialvalues, 0, tfinal, Npasos, E0, forward=False)[0, 0]
+            initialvalues = condicionesiniciales(E[j])
+            final[j] = leapfrog(atomohidrogeno, initialvalues, tinicial, tfinal, Npasos, E[j])[-1, 0]
     else:
         initialvalues = condicionesiniciales(E)
-        intersect = leapfrog(atomohidrogeno, initialvalues, 0, tfinal, Npasos, E, forward=False)[0, 0]
-    return intersect
+        final = leapfrog(atomohidrogeno, initialvalues, tinicial, tfinal, Npasos, E)[-1, 0]
+    return final
 
 # Aplicación de las funciones:
 
-energias = np.linspace(-1.01, -0.1, 100) # Se llega hasta -2/tfinal pues más allá la función de condiciones iniciales se indefine.
-phiphi = axisintersect(energias)
+energias = np.linspace(-1.1, -0.1, 100) # Se llega hasta -2/tfinal pues más allá la función de condiciones iniciales se indefine.
+phiphi = finalvalue(energias)
 fig1 = plt.figure(1)
 fig1.clf()
 ax1 = fig1.add_subplot(111)
@@ -114,10 +114,10 @@ roots = []
 for i in range(len(energias)-1):
     i+=1
     if phiphi[i]*phiphi[i-1] < 0: # Encontramos una autoenergía.
-        root = bisect(axisintersect, energias[i-1], energias[i], args=False, xtol=tol)
+        root = bisect(finalvalue, energias[i-1], energias[i], args=False, xtol=tol)
         roots.append(root)
         x = np.linspace(0, tfinal, Npasos)
-        fx = leapfrog(atomohidrogeno, condicionesiniciales(root), 0, tfinal, Npasos, root, forward=False)[:, 0]
+        fx = leapfrog(atomohidrogeno, condicionesiniciales(root), tinicial, tfinal, Npasos, root, forward=False)[:, 0]
         ax1.plot(x, normalize(x, fx), label=("Energia = %.2f" % root) + "$\cdot 13.6$ eV" )
 
 ax1.legend()
