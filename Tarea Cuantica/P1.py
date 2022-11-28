@@ -29,7 +29,7 @@ def leapfrog(rhs, initialvalue, initialtime, finaltime, Ndatapoints, params, for
     else:
         return X
 
-def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params):
+def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params, rettimes=False):
     '''
     Integrador con metodo de numerov la ecuación x(t)'' - R(t)*x(t) = S(t).
     Necesita 2 condiciones dadas por la inicial y la inmediatamente
@@ -57,21 +57,31 @@ def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params):
         Sn = Snew
         Rlast = Rn
         Rn = Rnew
-    return x
+    if rettimes:
+        return x, t
+    else:
+        return x
 
 
-# Normalizar (OJO QUE ESTE NO ES EL QUE HAY QUE USAR PARA QUE LA FUNCION DE ONDA SEA MODULO CUADRADO INTEGRABLE):
+# Normalizar:
 
 def normalize(x, fx):
-    return fx/simpson(fx, x)
+    return fx/np.sqrt(simpson(fx**2, x))
 
 #### AHORA EL CODIGO ES ESPECIFICO PARA ESTE PROBLEMA #####
 
 tfinal = 30
+tinicial = 0
 Npasos = 1000
-tol = 1e-10
-dt = tfinal/(Npasos-1)
+tol = 1e-4
 l = 0
+Emin = -1.1
+Emax = -0.1
+Nenergias = 100
+# Condiciones iniciales convenientes:
+
+def condicionesiniciales(E0, x0=0.01): # Esto antes era una función de E por eso es raro.
+    return np.array([1, 0.01])
 
 # RHS para este problema:
 
@@ -80,13 +90,7 @@ def atomohidrogeno(vec, t, E):
     x2dot = vec[0]*(l*(l+1)/(t**2) - 2/t - E)
     return np.array([x1dot, x2dot])
 
-# Condiciones iniciales convenientes:
 
-def condicionesiniciales(E0, x0=0.01):
-    # k2_0 = (l*(l+1)/(tfinal**2) - 2/tfinal - E0)   # PODRIA USAR ESTO PERO ES COMO MAGIA NEGRA
-    # v0 = -np.sqrt(k2_0)*x0 - k2_0*x0*dt/2
-    # return np.array([x0, v0])
-    return np.array([1, 0.01])
 # Determinamos cuando cambia de signo:
 
 def axisintersect(E, array=True):
@@ -95,15 +99,15 @@ def axisintersect(E, array=True):
         for j in trange(len(E)):
             E0 = E[j]
             initialvalues = condicionesiniciales(E0)
-            intersect[j] = leapfrog(atomohidrogeno, initialvalues, 0, tfinal, Npasos, E0, forward=False)[0, 0]
+            intersect[j] = leapfrog(atomohidrogeno, initialvalues, tinicial, tfinal, Npasos, E0, forward=False)[0, 0]
     else:
         initialvalues = condicionesiniciales(E)
-        intersect = leapfrog(atomohidrogeno, initialvalues, 0, tfinal, Npasos, E, forward=False)[0, 0]
+        intersect = leapfrog(atomohidrogeno, initialvalues, tinicial, tfinal, Npasos, E, forward=False)[0, 0]
     return intersect
 
 # Aplicación de las funciones:
 
-energias = np.linspace(-1.01, -0.1, 100) # Se llega hasta -2/tfinal pues más allá la función de condiciones iniciales se indefine.
+energias = np.linspace(Emin, Emax, Nenergias) 
 phiphi = axisintersect(energias)
 fig1 = plt.figure(1)
 fig1.clf()
@@ -116,8 +120,8 @@ for i in range(len(energias)-1):
     if phiphi[i]*phiphi[i-1] < 0: # Encontramos una autoenergía.
         root = bisect(axisintersect, energias[i-1], energias[i], args=False, xtol=tol)
         roots.append(root)
-        x = np.linspace(0, tfinal, Npasos)
-        fx = leapfrog(atomohidrogeno, condicionesiniciales(root), 0, tfinal, Npasos, root, forward=False)[:, 0]
+        x = np.linspace(tinicial, tfinal, Npasos)
+        fx = leapfrog(atomohidrogeno, condicionesiniciales(root), tinicial, tfinal, Npasos, root, forward=False)[:, 0]
         ax1.plot(x, normalize(x, fx), label=("Energia = %.2f" % root) + "$\cdot 13.6$ eV" )
 
 ax1.legend()

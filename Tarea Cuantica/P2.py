@@ -63,17 +63,18 @@ def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params):
 # Normalizar (OJO QUE ESTE NO ES EL QUE HAY QUE USAR PARA QUE LA FUNCION DE ONDA SEA MODULO CUADRADO INTEGRABLE):
 
 def normalize(x, fx):
-    return fx/simpson(fx, x)
+    return fx/simpson((fx)**2, x)
 
 #### AHORA EL CODIGO ES ESPECIFICO PARA ESTE PROBLEMA #####
 
 tfinal = 30
 tinicial = 0.001
 Npasos = 1000
-tol = 1e-10
-dt = (tfinal-tinicial)/(Npasos-1)
+tol = 1e-4
 l = 0
-
+Emin = -1.1
+Emax = -0.01
+Nenergias = 100
 # RHS para este problema:
 
 def atomohidrogeno(vec, t, E):
@@ -103,7 +104,7 @@ def finalvalue(E, array=True):
 
 # Aplicación de las funciones:
 
-energias = np.linspace(-1.1, -0.1, 100) # Se llega hasta -2/tfinal pues más allá la función de condiciones iniciales se indefine.
+energias = np.linspace(Emin, Emax, Nenergias) 
 phiphi = finalvalue(energias)
 fig1 = plt.figure(1)
 fig1.clf()
@@ -116,7 +117,7 @@ for i in range(len(energias)-1):
     if phiphi[i]*phiphi[i-1] < 0: # Encontramos una autoenergía.
         root = bisect(finalvalue, energias[i-1], energias[i], args=False, xtol=tol)
         roots.append(root)
-        x = np.linspace(0, tfinal, Npasos)
+        x = np.linspace(tinicial, tfinal, Npasos)
         fx = leapfrog(atomohidrogeno, condicionesiniciales(root), tinicial, tfinal, Npasos, root, forward=False)[:, 0]
         ax1.plot(x, normalize(x, fx), label=("Energia = %.2f" % root) + "$\cdot 13.6$ eV" )
 
