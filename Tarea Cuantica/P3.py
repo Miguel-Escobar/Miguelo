@@ -63,18 +63,19 @@ def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params):
 # Normalizar (OJO QUE ESTE NO ES EL QUE HAY QUE USAR PARA QUE LA FUNCION DE ONDA SEA MODULO CUADRADO INTEGRABLE):
 
 def normalize(x, fx):
-    return fx/simpson((fx)**2, x)
+    return fx/np.sqrt(simpson((fx)**2, x))
 
 #### AHORA EL CODIGO ES ESPECIFICO PARA ESTE PROBLEMA #####
 
 tfinal = 30
-tinicial = 1e-4
+tinicial = 1e-7
 Npasos = 1000
 tol = 1e-4
 l = 0
 Emin = -1.1
 Emax = -0.01
 Nenergias = 100
+dt = (tfinal - tinicial)/(Npasos-1)
 
 # RHS para este problema:
 
@@ -98,7 +99,7 @@ def condicionesiniciales(E0, x0=0.01):
     # k2_0 = (l*(l+1)/(tfinal**2) - 2/tfinal - E0)   # PODRIA USAR ESTO PERO ES COMO MAGIA NEGRA
     # v0 = -np.sqrt(k2_0)*x0 - k2_0*x0*dt/2
     # return np.array([x0, v0])
-    return np.array([0, 0.01])
+    return np.array([0, 0.001])
 # Determinamos cuando cambia de signo:
 
 def finalvalue(E, array=True):

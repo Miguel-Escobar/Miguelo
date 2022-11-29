@@ -63,7 +63,7 @@ def numerov(R, S, x0, x1, initialtime, finaltime, Ndatapoints, params):
 # Normalizar (OJO QUE ESTE NO ES EL QUE HAY QUE USAR PARA QUE LA FUNCION DE ONDA SEA MODULO CUADRADO INTEGRABLE):
 
 def normalize(x, fx):
-    return fx/simpson((fx)**2, x)
+    return fx/np.sqrt(simpson((fx)**2, x))
 
 #### AHORA EL CODIGO ES ESPECIFICO PARA ESTE PROBLEMA #####
 
