@@ -3,6 +3,7 @@ from scipy.special import loggamma
 import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import trange
+
 # Definir Log-likelihood.
 
 def ll(E, k, theta):

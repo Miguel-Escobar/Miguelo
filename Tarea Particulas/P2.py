@@ -12,12 +12,12 @@ masa=1
 epsilon=1
 
 # Parámetros globales
-sqrtN=2
+sqrtN=30
 N = sqrtN*sqrtN
 L=np.sqrt(N*sigma**2) # Tamaño de la caja
 Temperatura=1 # Temperatura
-Ttotal = 1 # Tiempo total de simulación
-Transiente = 1
+Ttotal = 30 # Tiempo total de simulación
+Transiente = 10
 dt= 0.01 # Paso de tiempo
 radioc=2.5*sigma # Radio de corte
 radioc2=radioc*radioc # Radio de corte al cuadrado
@@ -171,36 +171,36 @@ adivinanza =  (rcuadraticomedio[-1]-rcuadraticomedio[0])/(tiempos[-1]-tiempos[0]
 b, _ = curve_fit(fittable, tiempos, rcuadraticomedio, p0=adivinanza)
 
 
-# fig2 = plt.figure(2)
-# fig2.clf()
-# ax2 = fig2.add_subplot(211)
-# ax3 = fig2.add_subplot(212)
-# ax2.plot(tiempos, rcuadraticomedio, label=r"$\langle r(t)^{2} \rangle$")
-# ax2.plot(tiempos, fittable(tiempos, b), ls="--", label="Ajuste lineal")
-# ax3.plot(tiempos[1:], coeficienteD)
-# ax3.set_xlabel("tiempo")
-# ax2.set_xlabel("tiempo")
-# ax3.set_ylabel("D(t)")
-# ax2.set_ylabel(r"$\langle r(t)^{2} \rangle$")
-# ax2.legend()
-# fig2.tight_layout()
-# fig2.show()
-# print("Temperatura: " + str(Temperatura))
-# print("Coeficiente D: " +  str(coeficienteD[-1]))
-# print("Coeficiente ajuste lineal: " + str(b[0]))
+fig2 = plt.figure(2)
+fig2.clf()
+ax2 = fig2.add_subplot(211)
+ax3 = fig2.add_subplot(212)
+ax2.plot(tiempos, rcuadraticomedio, label=r"$\langle r(t)^{2} \rangle$")
+ax2.plot(tiempos, fittable(tiempos, b), ls="--", label="Ajuste lineal")
+ax3.plot(tiempos[1:], coeficienteD)
+ax3.set_xlabel("tiempo")
+ax2.set_xlabel("tiempo")
+ax3.set_ylabel("D(t)")
+ax2.set_ylabel(r"$\langle r(t)^{2} \rangle$")
+ax2.legend()
+fig2.tight_layout()
+fig2.show()
+print("Temperatura: " + str(Temperatura))
+print("Coeficiente D: " +  str(coeficienteD[-1]))
+print("Coeficiente ajuste lineal: " + str(b[0]))
 
-listaD = [1.622675119509858e-05, 0.0019038689202817295, 1.086578238614398e-05, 0.0005486093899001387, 0.00043602113583176514, 0.0008867940939022173, 0.002474892632365285, 0.0014321142393194145, 0.0007341196596340576, 0.003499715373845753, 0.0015031630698350061, 0.0013179581869484176]
-temperaturas = [.1, .1, .1, .5, .5, .5, 1, 1, 1, 2, 2, 2]
-fig = plt.figure(1)
-fig.clf()
-ax = fig.add_subplot(111)
-ax.plot(temperaturas, listaD, 'o', label="Datos")
-ax.plot([0.1, 0.5, 1, 2], [6.436e-4, 6.238e-4, 1.547e-3, 2.106e-3], "-o", label="Promedios")
-ax.legend()
-ax.set_xlabel("Temperatura")
-ax.set_ylabel("Coeficiente de difusión")
-fig.tight_layout()
-fig.show()
+# listaD = [1.622675119509858e-05, 0.0019038689202817295, 1.086578238614398e-05, 0.0005486093899001387, 0.00043602113583176514, 0.0008867940939022173, 0.002474892632365285, 0.0014321142393194145, 0.0007341196596340576, 0.003499715373845753, 0.0015031630698350061, 0.0013179581869484176]
+# temperaturas = [.1, .1, .1, .5, .5, .5, 1, 1, 1, 2, 2, 2]
+# fig = plt.figure(1)
+# fig.clf()
+# ax = fig.add_subplot(111)
+# ax.plot(temperaturas, listaD, 'o', label="Datos")
+# ax.plot([0.1, 0.5, 1, 2], [6.436e-4, 6.238e-4, 1.547e-3, 2.106e-3], "-o", label="Promedios")
+# ax.legend()
+# ax.set_xlabel("Temperatura")
+# ax.set_ylabel("Coeficiente de difusión")
+# fig.tight_layout()
+# fig.show()
 
 # while True:
 #     if input("¿Guardaste el gráfico? ").lower() == "si":
